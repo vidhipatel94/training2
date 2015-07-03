@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     EditText text;
     private static int DURATION = 500;
     private Subscription mSubscription;
-    private static String API_URL = "http://jsonplaceholder.typicode.com";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,12 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 .subscribe(s -> print(s));
 
         //network access
-        new RestAdapter.Builder()
-                .setEndpoint(API_URL)
-                .build()
-                .create(Api.class)
-                .getUsers()
-                .subscribe(users -> printUsers(users));
+        RestClient.getApi().getUsers().subscribe(users -> printUsers(users));
 
     }
 
