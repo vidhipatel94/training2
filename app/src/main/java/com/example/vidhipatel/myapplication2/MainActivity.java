@@ -73,50 +73,26 @@ public class MainActivity extends AppCompatActivity {
                 .subscribe(s -> print(s));
 
         //network access
-        Api api = new RestAdapter.Builder()
+        new RestAdapter.Builder()
                 .setEndpoint(API_URL)
                 .build()
-                .create(Api.class);
-        api.getUsers(new Callback<List<User>>() {
-            @Override
-            public void success(List<User> users, Response response) {
-                for (int i = 0; i < users.size(); i++) {
-                    User mUser = users.get(i);
-                    Log.d(TAG, mUser.getName());
-                }
+                .create(Api.class)
+                .getUsers()
+                .subscribe(users -> printUsers(users));
 
-            }
+    }
 
-            @Override
-            public void failure(RetrofitError error) {
-                Log.e(TAG, "Connection error");
-            }
-        });
+    private void printUsers(List<User> users) {
+        for (int i = 0; i < users.size(); i++) {
+            User mUser = users.get(i);
+            Log.d(TAG, i+": "+mUser.getName());
+        }
     }
 
     private void print(String s) {
         Log.d(TAG, s);
     }
 
-    /*private Observer<OnTextChangeEvent> searchObserver(){
-        return new Observer<OnTextChangeEvent>() {
-            @Override
-            public void onCompleted() {
-                Log.d(TAG,"Completed");
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG,"Error");
-            }
-
-            @Override
-            public void onNext(OnTextChangeEvent onTextChangeEvent) {
-                Log.d(TAG,"Searching for "+onTextChangeEvent.text());
-            }
-        };
-    }
-*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
