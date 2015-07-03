@@ -25,12 +25,15 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import rx.Observable;
 import rx.Observer;
+import rx.Scheduler;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.android.widget.OnTextChangeEvent;
 import rx.android.widget.WidgetObservable;
 import rx.functions.Func1;
 import rx.observers.Subscribers;
+import rx.schedulers.Schedulers;
 
 import static rx.android.app.AppObservable.bindActivity;
 
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         Observable<Integer> even = Observable.just(4, 5);
         Observable.merge(odd, even).subscribe(integer -> Log.d(TAG, integer + "")).unsubscribe();
 
-        Observable<OnTextChangeEvent> searchObservable = WidgetObservable.text(text);
+  /*      Observable<OnTextChangeEvent> searchObservable = WidgetObservable.text(text);
         mSubscription = bindActivity(this,
                 searchObservable
                         .debounce(DURATION, TimeUnit.MILLISECONDS)
@@ -71,16 +74,26 @@ public class MainActivity extends AppCompatActivity {
                                 //.mergeWith(odd)
                         .observeOn(AndroidSchedulers.mainThread()))
                 .subscribe(s -> print(s));
-
+*/
         //network access
-        RestClient.getApi().getUsers().subscribe(users -> printUsers(users));
+        Observable<List<User>> userObservable=Observable.create(new Observable.OnSubscribe<List<User>>() {
+            @Override
+            public void call(Subscriber<? super List<User>> subscriber) {
+                subscriber.onNext(RestClient.getApi().getUsers());
+            }
+        });
+        mSubscription = bindActivity(this,
+                userObservable
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread()))
+                        .subscribe(user -> printUsers(user));
 
     }
 
     private void printUsers(List<User> users) {
         for (int i = 0; i < users.size(); i++) {
             User mUser = users.get(i);
-            Log.d(TAG, i+": "+mUser.getName());
+            Log.d(TAG, i + ": " + mUser.getName());
         }
     }
 

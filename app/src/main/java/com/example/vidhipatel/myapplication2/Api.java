@@ -11,5 +11,5 @@ import rx.Observable;
  */
 public interface Api {
     @GET("/users")
-    Observable<List<User>> getUsers();
+    List<User> getUsers();
 }
