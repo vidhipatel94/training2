@@ -12,42 +12,61 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.concurrent.TimeUnit;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnTextChanged;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.android.widget.OnTextChangeEvent;
+import rx.android.widget.WidgetObservable;
+import rx.observers.Subscribers;
+
+import static rx.android.app.AppObservable.bindActivity;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    private CancelableRunnable mCancelRunnable;
-    private Handler mHandler = new Handler();
+    private static String TAG="MainActivity";
+    @Bind(R.id.edit_query) EditText text;
     private static int DURATION = 500;
+    private Subscription mSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        EditText text = (EditText) findViewById(R.id.edit_query);
-        text.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (mCancelRunnable != null && System.currentTimeMillis() - mCancelRunnable.time < DURATION)
-                    mCancelRunnable.isCancelled = true;
-
-                mCancelRunnable = new CancelableRunnable(s.toString());
-                mHandler.postDelayed(mCancelRunnable, DURATION);
-
-            }
-        });
+        Observable<OnTextChangeEvent> searchObservable = WidgetObservable.text(text);
+        mSubscription = bindActivity(this,
+                searchObservable
+                    .debounce(DURATION, TimeUnit.MILLISECONDS)
+                    .observeOn(AndroidSchedulers.mainThread()))
+                .subscribe(searchObserver());
     }
 
+    private Observer<OnTextChangeEvent> searchObserver(){
+        return new Observer<OnTextChangeEvent>() {
+            @Override
+            public void onCompleted() {
+                Log.d(TAG,"Completed");
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG,"Error");
+            }
+
+            @Override
+            public void onNext(OnTextChangeEvent onTextChangeEvent) {
+                Log.d(TAG,"Searching for "+onTextChangeEvent.text());
+            }
+        };
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -71,22 +90,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class CancelableRunnable implements Runnable {
-        String s;
-        long time;
-        boolean isCancelled;
-
-        CancelableRunnable(String s) {
-            this.s = s;
-            time = System.currentTimeMillis();
-        }
-
-        @Override
-        public void run() {
-            if (!isCancelled)
-                Log.d("Mainactivity", s);
-        }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mSubscription!=null)
+            mSubscription.unsubscribe();
     }
-
 
 }
