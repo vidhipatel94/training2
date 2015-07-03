@@ -12,11 +12,17 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnTextChanged;
+import retrofit.Callback;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
@@ -36,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     EditText text;
     private static int DURATION = 500;
     private Subscription mSubscription;
+    private static String API_URL = "http://jsonplaceholder.typicode.com";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +59,6 @@ public class MainActivity extends AppCompatActivity {
                 searchObservable
                         .debounce(DURATION, TimeUnit.MILLISECONDS)
                         .filter(onTextChangeEvent -> !onTextChangeEvent.text().toString().isEmpty())
-                        /*.map(new Func1<OnTextChangeEvent, Observable<?>>() {
-                            @Override
-                            public Observable<?> call(OnTextChangeEvent onTextChangeEvent) {
-                                return Observable.from(onTextChangeEvent.text().toString().split(" ", 3));
-                            }
-                        })*/
                         .flatMap(new Func1<OnTextChangeEvent, Observable<?>>() {
                             @Override
                             public Observable<?> call(OnTextChangeEvent onTextChangeEvent) {
@@ -70,6 +71,27 @@ public class MainActivity extends AppCompatActivity {
                                 //.mergeWith(odd)
                         .observeOn(AndroidSchedulers.mainThread()))
                 .subscribe(s -> print(s));
+
+        //network access
+        Api api = new RestAdapter.Builder()
+                .setEndpoint(API_URL)
+                .build()
+                .create(Api.class);
+        api.getUsers(new Callback<List<User>>() {
+            @Override
+            public void success(List<User> users, Response response) {
+                for (int i = 0; i < users.size(); i++) {
+                    User mUser = users.get(i);
+                    Log.d(TAG, mUser.getName());
+                }
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.e(TAG, "Connection error");
+            }
+        });
     }
 
     private void print(String s) {
