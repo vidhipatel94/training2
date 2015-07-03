@@ -1,18 +1,53 @@
 package com.example.vidhipatel.myapplication2;
 
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.Toast;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
+
+    private CancelableRunnable mCancelRunnable;
+    private Handler mHandler = new Handler();
+    private static int DURATION = 500;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        EditText text = (EditText) findViewById(R.id.edit_query);
+        text.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (mCancelRunnable != null && System.currentTimeMillis() - mCancelRunnable.time < DURATION)
+                    mCancelRunnable.isCancelled = true;
+
+                mCancelRunnable = new CancelableRunnable(s.toString());
+                mHandler.postDelayed(mCancelRunnable, DURATION);
+
+            }
+        });
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -35,4 +70,23 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private class CancelableRunnable implements Runnable {
+        String s;
+        long time;
+        boolean isCancelled;
+
+        CancelableRunnable(String s) {
+            this.s = s;
+            time = System.currentTimeMillis();
+        }
+
+        @Override
+        public void run() {
+            if (!isCancelled)
+                Log.d("Mainactivity", s);
+        }
+    }
+
+
 }
