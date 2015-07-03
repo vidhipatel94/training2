@@ -23,6 +23,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.android.widget.OnTextChangeEvent;
 import rx.android.widget.WidgetObservable;
+import rx.functions.Func1;
 import rx.observers.Subscribers;
 
 import static rx.android.app.AppObservable.bindActivity;
@@ -30,8 +31,9 @@ import static rx.android.app.AppObservable.bindActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static String TAG="MainActivity";
-    @Bind(R.id.edit_query) EditText text;
+    private static String TAG = "MainActivity";
+    @Bind(R.id.edit_query)
+    EditText text;
     private static int DURATION = 500;
     private Subscription mSubscription;
 
@@ -41,15 +43,40 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        Observable<String> odd = Observable.just("AA", "CC", "EE", "GG", "II");
+        Observable<Integer> even = Observable.just(4, 5);
+        Observable.merge(odd, even).subscribe(integer -> Log.d(TAG, integer + "")).unsubscribe();
+
         Observable<OnTextChangeEvent> searchObservable = WidgetObservable.text(text);
         mSubscription = bindActivity(this,
                 searchObservable
-                    .debounce(DURATION, TimeUnit.MILLISECONDS)
-                    .observeOn(AndroidSchedulers.mainThread()))
-                .subscribe(searchObserver());
+                        .debounce(DURATION, TimeUnit.MILLISECONDS)
+                        .filter(onTextChangeEvent -> !onTextChangeEvent.text().toString().isEmpty())
+                        /*.map(new Func1<OnTextChangeEvent, Observable<?>>() {
+                            @Override
+                            public Observable<?> call(OnTextChangeEvent onTextChangeEvent) {
+                                return Observable.from(onTextChangeEvent.text().toString().split(" ", 3));
+                            }
+                        })*/
+                        .flatMap(new Func1<OnTextChangeEvent, Observable<?>>() {
+                            @Override
+                            public Observable<?> call(OnTextChangeEvent onTextChangeEvent) {
+                                return Observable.from(onTextChangeEvent.text().toString().split(" ", 3));
+                            }
+                        })
+                        .map(o -> o.toString())
+                        .map(s -> "Search:" + s)
+                                //     .takeFirst(s1 -> s1.equals("Search:vi"))
+                                //.mergeWith(odd)
+                        .observeOn(AndroidSchedulers.mainThread()))
+                .subscribe(s -> print(s));
     }
 
-    private Observer<OnTextChangeEvent> searchObserver(){
+    private void print(String s) {
+        Log.d(TAG, s);
+    }
+
+    /*private Observer<OnTextChangeEvent> searchObserver(){
         return new Observer<OnTextChangeEvent>() {
             @Override
             public void onCompleted() {
@@ -67,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
     }
-
+*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -93,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mSubscription!=null)
+        if (mSubscription != null)
             mSubscription.unsubscribe();
     }
 
