@@ -52,7 +52,7 @@ public class Albums extends AppCompatActivity {
         myRecyclerAdapter.setOnItemClickListener(new MyRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
-                Toast.makeText(getApplicationContext(),position+"",Toast.LENGTH_LONG).show();
+               // Toast.makeText(getApplicationContext(),position+"",Toast.LENGTH_LONG).show();
                 Intent i = new Intent(getApplicationContext(), DisplayImagesActivity.class);
                 i.putExtra("position",position);
                // i.putExtra("position", (Serializable) fpath);
