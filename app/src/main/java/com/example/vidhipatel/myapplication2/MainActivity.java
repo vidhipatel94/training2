@@ -34,6 +34,7 @@ import rx.android.widget.WidgetObservable;
 import rx.functions.Func1;
 import rx.observers.Subscribers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 import static rx.android.app.AppObservable.bindActivity;
 
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.edit_query)
     EditText text;
     private static int DURATION = 500;
-    private Subscription mSubscription;
+    private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
 
     @Override
@@ -57,8 +58,8 @@ public class MainActivity extends AppCompatActivity {
         Observable<Integer> even = Observable.just(4, 5);
         Observable.merge(odd, even).subscribe(integer -> Log.d(TAG, integer + "")).unsubscribe();
 
-  /*      Observable<OnTextChangeEvent> searchObservable = WidgetObservable.text(text);
-        mSubscription = bindActivity(this,
+        Observable<OnTextChangeEvent> searchObservable = WidgetObservable.text(text);
+        mSubscriptions.add(bindActivity(this,
                 searchObservable
                         .debounce(DURATION, TimeUnit.MILLISECONDS)
                         .filter(onTextChangeEvent -> !onTextChangeEvent.text().toString().isEmpty())
@@ -73,21 +74,27 @@ public class MainActivity extends AppCompatActivity {
                                 //     .takeFirst(s1 -> s1.equals("Search:vi"))
                                 //.mergeWith(odd)
                         .observeOn(AndroidSchedulers.mainThread()))
-                .subscribe(s -> print(s));
-*/
+                .subscribe(s -> print(s)));
+
         //network access
-        Observable<List<User>> userObservable=Observable.create(new Observable.OnSubscribe<List<User>>() {
+        Observable<List<User>> userObservable = Observable.create(new Observable.OnSubscribe<List<User>>() {
             @Override
             public void call(Subscriber<? super List<User>> subscriber) {
+                Log.d(TAG, "Call");
                 subscriber.onNext(RestClient.getApi().getUsers());
             }
         });
-        mSubscription = bindActivity(this,
+        mSubscriptions.add(bindActivity(this,
                 userObservable
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread()))
-                        .subscribe(user -> printUsers(user));
+                .subscribe(user -> printUsers(user)));
 
+
+        mSubscriptions.add(bindActivity(this,
+                Observable.timer(0, 200, TimeUnit.MILLISECONDS,Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread()))
+                .subscribe(aLong -> Toast.makeText(getApplicationContext(), "Timer" + aLong, Toast.LENGTH_SHORT).show()));
     }
 
     private void printUsers(List<User> users) {
@@ -126,8 +133,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mSubscription != null)
-            mSubscription.unsubscribe();
+        if (mSubscriptions != null)
+            //mSubscriptions.unsubscribe();
+            mSubscriptions.clear();
+        Log.d(TAG, "Destroyed");
     }
 
 }
