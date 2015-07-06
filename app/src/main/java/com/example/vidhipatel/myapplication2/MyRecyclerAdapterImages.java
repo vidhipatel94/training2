@@ -2,22 +2,11 @@ package com.example.vidhipatel.myapplication2;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.TextView;
-
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -27,16 +16,11 @@ import butterknife.ButterKnife;
  */
 public class MyRecyclerAdapterImages extends RecyclerView.Adapter<MyRecyclerAdapterImages.ViewHolder> {
 
-    private List<String> mfPath;
     private int itemLayout;
-    private int startFrom;
-    private int count;
-
-    public MyRecyclerAdapterImages(List<String> mfPath,int startFrom, int count,int itemLayout) {
+    private GalleryFolder galleryFolder;
+    public MyRecyclerAdapterImages(GalleryFolder galleryFolder,int itemLayout) {
+        this.galleryFolder=galleryFolder;
         this.itemLayout = itemLayout;
-        this.mfPath=mfPath;
-        this.startFrom=startFrom;
-        this.count=count;
     }
 
     @Override
@@ -48,7 +32,7 @@ public class MyRecyclerAdapterImages extends RecyclerView.Adapter<MyRecyclerAdap
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
 
-        Bitmap bitmap= BitmapFactory.decodeFile(mfPath.get(startFrom+i));
+        Bitmap bitmap= BitmapFactory.decodeFile(galleryFolder.getImagePathAt(i));
         viewHolder.mImageView.setImageBitmap(bitmap);
         viewHolder.mImageView.setScaleType(ImageView.ScaleType.MATRIX);
 
@@ -56,7 +40,7 @@ public class MyRecyclerAdapterImages extends RecyclerView.Adapter<MyRecyclerAdap
 
     @Override
     public int getItemCount() {
-        return count;
+        return galleryFolder.getImageCount();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

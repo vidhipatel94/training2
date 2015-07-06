@@ -1,26 +1,19 @@
 package com.example.vidhipatel.myapplication2;
 
 import android.content.Intent;
-import android.os.Environment;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -30,9 +23,8 @@ public class Albums extends AppCompatActivity {
 
     private static final String TAG="Albums";
     private static final File PATH= Environment.getExternalStorageDirectory();
-    List<String> folders;
-    public static List<Integer> foldersCount;
-    public static List<String> fpath;
+    List<GalleryFolder> galleryFolderList;
+    int folderCount=0;
 
     @Bind(R.id.list) RecyclerView mRecyclerView;
     MyRecyclerAdapter myRecyclerAdapter;
@@ -43,25 +35,20 @@ public class Albums extends AppCompatActivity {
         setContentView(R.layout.activity_albums);
         ButterKnife.bind(this);
 
-        folders=new ArrayList<String>();
-        foldersCount=new ArrayList<Integer>();
-        fpath=new ArrayList<String>();
+        galleryFolderList=new ArrayList<GalleryFolder>();
         searchDirectory(PATH);
 
-        myRecyclerAdapter=new MyRecyclerAdapter(folders,foldersCount,fpath,R.layout.gridlist_layout);
+        myRecyclerAdapter=new MyRecyclerAdapter(galleryFolderList ,R.layout.gridlist_layout);
         myRecyclerAdapter.setOnItemClickListener(new MyRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
-               // Toast.makeText(getApplicationContext(),position+"",Toast.LENGTH_LONG).show();
                 Intent i = new Intent(getApplicationContext(), DisplayImagesActivity.class);
-                i.putExtra("position",position);
-               // i.putExtra("position", (Serializable) fpath);
+                i.putExtra("GalleryFolder", galleryFolderList.get(position));
                 startActivity(i);
             }
         });
         displayFolders();
-        for(String s:folders)
-            Log.d(TAG,s);
+
     }
 
     private void displayFolders() {
@@ -80,16 +67,19 @@ public class Albums extends AppCompatActivity {
                 String type=fname.substring((fname.lastIndexOf(".") + 1), fname.length());
                 if(type.equals("jpg")) {
                     fimagecount++;
-                    fpath.add(f.getAbsolutePath());
-                    //Log.d(TAG,"File: " + f.getName() + " Dir: "+ f.getParentFile().getName());
+                    if(fimagecount==1) {
+                        folderCount++;
+                        GalleryFolder galleryFolder=new GalleryFolder(path.getName(), fimagecount);
+                        galleryFolderList.add(galleryFolder);
+                    }
+                    galleryFolderList.get(folderCount-1).addImagePath(f.getAbsolutePath());
                 }
             }
             else
                 searchDirectory(f);
         }
-        if(fimagecount>0) {
-            folders.add(path.getName());
-            foldersCount.add(fimagecount);
+        if(fimagecount>1) {
+            galleryFolderList.get(folderCount-1).setImageCount(fimagecount);
         }
     }
 

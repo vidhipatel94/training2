@@ -2,22 +2,14 @@ package com.example.vidhipatel.myapplication2;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -27,18 +19,14 @@ import butterknife.ButterKnife;
  */
 public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> {
 
-    private List<String> mDirList;
-    private List<Integer> mImageCount;
-    private List<String> mfPath;
+    private List<GalleryFolder> galleryFolderList;
     private int itemLayout;
     private String mDir;
     OnItemClickListener mOnItemClickListener;
 
-    public MyRecyclerAdapter(List<String> mDirList, List<Integer> mImageCount, List<String> mfPath,int itemLayout) {
-        this.mDirList = mDirList;
-        this.mImageCount = mImageCount;
+    public MyRecyclerAdapter(List<GalleryFolder> galleryFolderList,int itemLayout) {
         this.itemLayout = itemLayout;
-        this.mfPath=mfPath;
+        this.galleryFolderList = galleryFolderList;
     }
 
     @Override
@@ -49,14 +37,12 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
-        mDir = mDirList.get(i);
-        viewHolder.mDirName.setText(mDir);
-        viewHolder.mImageCount.setText(mImageCount.get(i).toString());
+        GalleryFolder galleryFolder=galleryFolderList.get(i);
 
-        int iFile = 0;
-        for(int j=0;j<i;j++)
-            iFile+=mImageCount.get(j);
-        Bitmap bitmap= BitmapFactory.decodeFile(mfPath.get(iFile));
+        viewHolder.mDirName.setText(galleryFolder.getFolderName());
+        viewHolder.mImageCount.setText(galleryFolder.getImageCount()+"");
+
+        Bitmap bitmap= BitmapFactory.decodeFile(galleryFolder.getImagePathAt(0));
         viewHolder.mImageView.setImageBitmap(bitmap);
         viewHolder.mImageView.setScaleType(ImageView.ScaleType.MATRIX);
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +56,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     @Override
     public int getItemCount() {
-        return mDirList.size();
+        return galleryFolderList.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

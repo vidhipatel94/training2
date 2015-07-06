@@ -1,7 +1,7 @@
 package com.example.vidhipatel.myapplication2;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,23 +12,19 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 
-public class DisplayImagesActivity extends ActionBarActivity {
+public class DisplayImagesActivity extends AppCompatActivity {
 
     @Bind(R.id.images) RecyclerView mRecyclerView;
     MyRecyclerAdapterImages myRecyclerAdapterImages;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int iDir=getIntent().getExtras().getInt("position");
-
+        GalleryFolder galleryFolder= (GalleryFolder) getIntent().getSerializableExtra("GalleryFolder");
         setContentView(R.layout.activity_images);
         ButterKnife.bind(this);
 
-        int startFrom=0;
-        int j;
-        for(j=0;j<iDir;j++)
-            startFrom+=Albums.foldersCount.get(j);
-        myRecyclerAdapterImages=new MyRecyclerAdapterImages(Albums.fpath,startFrom,Albums.foldersCount.get(j),R.layout.images_gridlayout);
+        myRecyclerAdapterImages=new MyRecyclerAdapterImages(galleryFolder,R.layout.images_gridlayout);
         displayImages();
 
     }
