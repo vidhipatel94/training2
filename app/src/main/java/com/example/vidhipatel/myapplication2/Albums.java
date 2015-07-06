@@ -38,7 +38,7 @@ public class Albums extends AppCompatActivity {
         galleryFolderList = new ArrayList<GalleryFolder>();
         searchDirectory(PATH);
 
-        myRecyclerAdapter = new MyRecyclerAdapter(galleryFolderList, R.layout.gridlist_layout);
+        myRecyclerAdapter = new MyRecyclerAdapter(getApplicationContext(),galleryFolderList, R.layout.gridlist_layout);
         myRecyclerAdapter.setOnItemClickListener(new MyRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {

@@ -1,5 +1,6 @@
 package com.example.vidhipatel.myapplication2;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
@@ -21,9 +24,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private List<GalleryFolder> galleryFolderList;
     private int itemLayout;
+    private Context context;
     OnItemClickListener mOnItemClickListener;
 
-    public MyRecyclerAdapter(List<GalleryFolder> galleryFolderList,int itemLayout) {
+    public MyRecyclerAdapter(Context context,List<GalleryFolder> galleryFolderList,int itemLayout) {
+        this.context=context;
         this.itemLayout = itemLayout;
         this.galleryFolderList = galleryFolderList;
     }
@@ -41,8 +46,14 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         viewHolder.mDirName.setText(galleryFolder.getFolderName());
         viewHolder.mImageCount.setText(galleryFolder.getImageCount()+"");
 
-        Bitmap bitmap= BitmapFactory.decodeFile(galleryFolder.getImagePathAt(0));
-        viewHolder.mImageView.setImageBitmap(bitmap);
+        //Bitmap bitmap= BitmapFactory.decodeFile(galleryFolder.getImagePathAt(0));
+        //viewHolder.mImageView.setImageBitmap(bitmap);
+        Glide.with(context)
+                .load(galleryFolder.getImagePathAt(0))
+                .fitCenter()
+                .centerCrop()
+                .into(viewHolder.mImageView);
+
         viewHolder.mImageView.setScaleType(ImageView.ScaleType.MATRIX);
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

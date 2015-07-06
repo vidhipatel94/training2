@@ -24,7 +24,7 @@ public class DisplayImagesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_images);
         ButterKnife.bind(this);
 
-        myRecyclerAdapterImages=new MyRecyclerAdapterImages(galleryFolder,R.layout.images_gridlayout);
+        myRecyclerAdapterImages=new MyRecyclerAdapterImages(getApplicationContext(),galleryFolder,R.layout.images_gridlayout);
         displayImages();
 
     }

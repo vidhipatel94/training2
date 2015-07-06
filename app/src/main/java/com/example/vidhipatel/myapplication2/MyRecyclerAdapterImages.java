@@ -1,5 +1,6 @@
 package com.example.vidhipatel.myapplication2;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -18,7 +21,9 @@ public class MyRecyclerAdapterImages extends RecyclerView.Adapter<MyRecyclerAdap
 
     private int itemLayout;
     private GalleryFolder galleryFolder;
-    public MyRecyclerAdapterImages(GalleryFolder galleryFolder,int itemLayout) {
+    private Context context;
+    public MyRecyclerAdapterImages(Context context,GalleryFolder galleryFolder,int itemLayout) {
+        this.context=context;
         this.galleryFolder=galleryFolder;
         this.itemLayout = itemLayout;
     }
@@ -32,8 +37,13 @@ public class MyRecyclerAdapterImages extends RecyclerView.Adapter<MyRecyclerAdap
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
 
-        Bitmap bitmap= BitmapFactory.decodeFile(galleryFolder.getImagePathAt(i));
-        viewHolder.mImageView.setImageBitmap(bitmap);
+        //Bitmap bitmap= BitmapFactory.decodeFile(galleryFolder.getImagePathAt(i));
+        //viewHolder.mImageView.setImageBitmap(bitmap);
+        Glide.with(context)
+                .load(galleryFolder.getImagePathAt(i))
+                .fitCenter()
+                .centerCrop()
+                .into(viewHolder.mImageView);
         viewHolder.mImageView.setScaleType(ImageView.ScaleType.MATRIX);
 
     }
