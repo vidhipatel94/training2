@@ -21,7 +21,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private List<GalleryFolder> galleryFolderList;
     private int itemLayout;
-    private String mDir;
     OnItemClickListener mOnItemClickListener;
 
     public MyRecyclerAdapter(List<GalleryFolder> galleryFolderList,int itemLayout) {

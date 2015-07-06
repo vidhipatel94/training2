@@ -9,12 +9,10 @@ import java.util.List;
  */
 public class GalleryFolder implements Serializable{
     private String folderName;
-    private int imageCount;
     private List<String> imagePath;
 
-    public GalleryFolder(String folderName, int imageCount) {
+    public GalleryFolder(String folderName) {
         this.folderName = folderName;
-        this.imageCount = imageCount;
         imagePath=new ArrayList<String>();
     }
 
@@ -26,16 +24,12 @@ public class GalleryFolder implements Serializable{
         return imagePath.get(position);
     }
 
-    public void setImageCount(int imageCount) {
-        this.imageCount = imageCount;
-    }
-
     public String getFolderName() {
         return folderName;
     }
 
     public int getImageCount() {
-        return imageCount;
+        return imagePath.size();
     }
 
 }

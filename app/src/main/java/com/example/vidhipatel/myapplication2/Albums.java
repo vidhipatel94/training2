@@ -21,12 +21,12 @@ import butterknife.ButterKnife;
 
 public class Albums extends AppCompatActivity {
 
-    private static final String TAG="Albums";
-    private static final File PATH= Environment.getExternalStorageDirectory();
+    private static final String TAG = "Albums";
+    private static final File PATH = Environment.getExternalStorageDirectory();
     List<GalleryFolder> galleryFolderList;
-    int folderCount=0;
 
-    @Bind(R.id.list) RecyclerView mRecyclerView;
+    @Bind(R.id.list)
+    RecyclerView mRecyclerView;
     MyRecyclerAdapter myRecyclerAdapter;
 
     @Override
@@ -35,10 +35,10 @@ public class Albums extends AppCompatActivity {
         setContentView(R.layout.activity_albums);
         ButterKnife.bind(this);
 
-        galleryFolderList=new ArrayList<GalleryFolder>();
+        galleryFolderList = new ArrayList<GalleryFolder>();
         searchDirectory(PATH);
 
-        myRecyclerAdapter=new MyRecyclerAdapter(galleryFolderList ,R.layout.gridlist_layout);
+        myRecyclerAdapter = new MyRecyclerAdapter(galleryFolderList, R.layout.gridlist_layout);
         myRecyclerAdapter.setOnItemClickListener(new MyRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
@@ -59,28 +59,27 @@ public class Albums extends AppCompatActivity {
     }
 
     private void searchDirectory(File path) {
-        File[] files=path.listFiles();
-        int fimagecount=0;
-        for(File f:files){
-            if(f.isFile()) {
-                String fname=f.getName();
-                String type=fname.substring((fname.lastIndexOf(".") + 1), fname.length());
-                if(type.equals("jpg")) {
-                    fimagecount++;
-                    if(fimagecount==1) {
-                        folderCount++;
-                        GalleryFolder galleryFolder=new GalleryFolder(path.getName(), fimagecount);
-                        galleryFolderList.add(galleryFolder);
+        File[] files = path.listFiles();
+        GalleryFolder galleryFolder = null;
+        for (File f : files) {
+            if (f.isFile()) {
+                String fname = f.getName();
+                String type = fname.substring((fname.lastIndexOf(".") + 1), fname.length());
+                if (type.equals("jpg")) {
+                    if (galleryFolder == null) {
+                        galleryFolder = new GalleryFolder(path.getName());
                     }
-                    galleryFolderList.get(folderCount-1).addImagePath(f.getAbsolutePath());
+                    galleryFolder.addImagePath(f.getAbsolutePath());
                 }
-            }
-            else
+            } else
                 searchDirectory(f);
         }
-        if(fimagecount>1) {
-            galleryFolderList.get(folderCount-1).setImageCount(fimagecount);
+
+        if (galleryFolder!=null)
+        {
+            galleryFolderList.add(galleryFolder);
         }
+
     }
 
     @Override
